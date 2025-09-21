@@ -4,25 +4,44 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='TwitchRedem',
+            name="TwitchRedem",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('user', models.CharField(max_length=255, verbose_name='Ник')),
-                ('reward', models.CharField(max_length=255, verbose_name='Награда')),
-                ('text', models.TextField(blank=True, help_text='Пустое, если награда не предполагает ввода текста', null=True, verbose_name='Текст')),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Дата получения')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("user", models.CharField(max_length=255, verbose_name="Ник")),
+                ("reward", models.CharField(max_length=255, verbose_name="Награда")),
+                (
+                    "text",
+                    models.TextField(
+                        blank=True,
+                        help_text="Пустое, если награда не предполагает ввода текста",
+                        null=True,
+                        verbose_name="Текст",
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Дата получения"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': ('Награда зрителя',),
-                'verbose_name_plural': 'Награды зрителей',
+                "verbose_name": ("Награда зрителя",),
+                "verbose_name_plural": "Награды зрителей",
             },
         ),
     ]
