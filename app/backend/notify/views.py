@@ -1,10 +1,14 @@
 import asyncio
+from asgiref.sync import async_to_sync
+
 from django.views import View
 from django.conf import settings
 from django.http import JsonResponse, HttpResponseRedirect
 
 from .models import TwitchTokens
 from .auth import TwitchOAuthClient
+
+from app.asgi import handler
 
 class TwitchLogin(View):
 
@@ -34,3 +38,9 @@ class TwitchCallbackLogin(View):
             access_token=tokens["access_token"], refresh_token=tokens["refresh_token"]
         )
         return JsonResponse(tokens)
+
+class TwitchNotifyFollowDebugView(View):
+
+    def get(self, request, *args, **kwargs):
+        async_to_sync(handler.simulate_subscription)("TestUser")
+        return JsonResponse({"status": "ok", "user": "TestUser"})

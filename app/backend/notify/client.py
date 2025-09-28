@@ -10,6 +10,7 @@ from twitchAPI.eventsub.websocket import EventSubWebsocket
 from django.conf import settings
 from .models import TwitchRedem, TwitchTokens
 from .websocket import WebSocketBroadcaster
+from .utils import generate_tts
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +54,9 @@ class TwitchEventHandler:
         logger.info("TwitchEventHandler успешно подключён и слушает события")
         return True
 
+    async def simulate_subscription(self, username="TestUser"):
+        await self.broadcaster.broadcast("follow", {"user": username})
+
     async def register_events(self):
         await self.eventsub.listen_channel_follow_v2(
             self.user.id, self.user.id, self.on_follow
@@ -76,10 +80,21 @@ class TwitchEventHandler:
             lambda: TwitchRedem.objects.create(user=user, reward=reward, text=message)
         )()
 
-        # Отправляем в OBS
-        await self.broadcaster.broadcast(
-            "reward", {"user": user, "reward": reward, "message": message}
-        )
+        # TODO: Убрать этот хардкод и сделать настройку из под фронта
+        if "озвуч" in reward:
+            tts_file = generate_tts(text=message)
+
+            # Отправляем в OBS
+            await self.broadcaster.broadcast(
+                "reward", {"user": user, "reward": reward, "message": message, "tts_url": tts_file}
+            )           
+
+        else:
+
+            # Отправляем в OBS
+            await self.broadcaster.broadcast(
+                "reward", {"user": user, "reward": reward, "message": message}
+            )
 
     async def run_forever(self):
         while True:
