@@ -1,0 +1,41 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>obs.notify</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-900 min-h-screen flex items-center justify-center">
+
+    <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
+        <h2 class="text-2xl font-bold mb-6 text-center">Welcome, to obs.notify!</h2>
+        <p class="text-xs text-gray-500 mt-1">
+            Please enter the information you received when creating your app in the Twitch Developer Console.
+        </p>
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+
+            <div>
+                <label for="client_id" class="block text-sm font-medium text-gray-700">Client ID</label>
+                <input type="password" id="client_id" name="client_id" required
+                    class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 p-2">
+            </div>
+
+            <div>
+                <label for="client_secret" class="block text-sm font-medium text-gray-700">Client Secret Key</label>
+                <input type="password" id="client_secret" name="client_secret" required
+                    class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 p-2">
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-purple-600 text-white py-2 px-4 rounded-xl shadow hover:bg-purple-700 transition">
+                Auth
+            </button>
+        </form>
+    </div>
+
+</body>
+</html>

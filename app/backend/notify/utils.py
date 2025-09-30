@@ -3,8 +3,8 @@ import uuid
 from gtts import gTTS
 from django.conf import settings
 
-def generate_tts(text: str) -> str:
 
+def generate_tts(text: str) -> str:
     tts_dir = os.path.join(settings.BASE_DIR, "static", "tts")
     os.makedirs(tts_dir, exist_ok=True)
 

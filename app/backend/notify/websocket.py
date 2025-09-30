@@ -2,7 +2,6 @@ from channels.layers import get_channel_layer
 
 
 class WebSocketBroadcaster:
-
     def __init__(self, group_name="obs_group"):
         self.group_name = group_name
         self.channel_layer = get_channel_layer()

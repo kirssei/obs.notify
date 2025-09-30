@@ -8,7 +8,13 @@ from twitchAPI.type import AuthScope
 from twitchAPI.eventsub.websocket import EventSubWebsocket
 
 from django.conf import settings
-from .models import TwitchRedem, TwitchTokens
+from .models import (
+    TwitchReward,
+    TwitchTokens,
+    TwitchSecretsApp,
+    TwitchFollow,
+    TwitchBaseReward,
+)
 from .websocket import WebSocketBroadcaster
 from .utils import generate_tts
 
@@ -26,12 +32,13 @@ class TwitchEventHandler:
     async def setup(self) -> bool:
         tokens = await sync_to_async(TwitchTokens.get_tokens)()
         if not tokens:
-            logger.warning("Нет токенов Twitch в базе, ждём авторизации пользователя")
             return False
 
-        self.twitch = await Twitch(
-            settings.TWITCH_CLIENT_ID, settings.TWITCH_CLIENT_SECRET
-        )
+        secrets = await sync_to_async(TwitchSecretsApp.get_secrets)()
+        if not secrets:
+            return False
+
+        self.twitch = await Twitch(secrets.client_id, secrets.client_secret)
 
         scopes = [
             AuthScope.MODERATOR_READ_FOLLOWERS,
@@ -51,8 +58,25 @@ class TwitchEventHandler:
 
         await self.register_events()
 
-        logger.info("TwitchEventHandler успешно подключён и слушает события")
         return True
+
+    async def sync_rewards(self):
+        if not self.user or not self.twitch:
+            return []
+
+        rewards = await self.twitch.get_custom_reward(broadcaster_id=self.user.id)
+
+        for reward in rewards:
+            await sync_to_async(TwitchBaseReward.objects.update_or_create)(
+                reward_id=reward.id,
+                defaults={
+                    "name": reward.title,
+                    "cost": reward.cost,
+                    "is_enabled": reward.is_enabled,
+                },
+            )
+
+        return rewards
 
     async def simulate_subscription(self, username="TestUser"):
         await self.broadcaster.broadcast("follow", {"user": username})
@@ -67,31 +91,36 @@ class TwitchEventHandler:
 
     async def on_follow(self, data):
         username = data.event.user_name
-        logger.info(f"Новый фолловер: {username}")
         await self.broadcaster.broadcast("follow", {"user": username})
 
     async def on_redemption(self, data):
         user = data.event.user_name
         reward = data.event.reward.title
+        reward_id = data.event.reward.id
         message = data.event.user_input
 
-        # Сохраняем в БД
         await sync_to_async(
-            lambda: TwitchRedem.objects.create(user=user, reward=reward, text=message)
+            lambda: TwitchReward.objects.create(user=user, reward=reward, text=message)
         )()
 
-        # TODO: Убрать этот хардкод и сделать настройку из под фронта
-        if "озвуч" in reward:
+        base_reward = await sync_to_async(
+            lambda: TwitchBaseReward.get_by_reward_id(reward_id=reward_id)
+        )()
+
+        if base_reward.use_tts:
             tts_file = generate_tts(text=message)
 
-            # Отправляем в OBS
             await self.broadcaster.broadcast(
-                "reward", {"user": user, "reward": reward, "message": message, "tts_url": tts_file}
-            )           
+                "reward",
+                {
+                    "user": user,
+                    "reward": reward,
+                    "message": message,
+                    "tts_url": tts_file,
+                },
+            )
 
         else:
-
-            # Отправляем в OBS
             await self.broadcaster.broadcast(
                 "reward", {"user": user, "reward": reward, "message": message}
             )
@@ -107,7 +136,7 @@ class TwitchEventHandler:
             while True:
                 await asyncio.sleep(3600)
         except Exception as e:
-            logger.exception("Ошибка в TwitchEventHandler: %s", e)
+            logger.exception("Error in TwitchEventHandler: %s", e)
         finally:
             if self.eventsub:
                 await self.eventsub.stop()
