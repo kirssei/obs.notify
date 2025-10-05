@@ -14,16 +14,15 @@ DEBUG = os.environ.get("DEBUG")
 
 ALLOWED_HOSTS = ["*"]
 
-include("components/apps.py")
+COMPONENTS = [
+    "components/apps.py",
+    "components/twitch.py",
+    "components/channels.py",
+    "components/database.py",
+    "components/auth.py",
+    "components/international.py",
+    "components/static.py",
+]
 
-include("components/twitch.py")
-
-include("components/channels.py")
-
-include("components/database.py")
-
-include("components/auth.py")
-
-include("components/international.py")
-
-include("components/static.py")
+for conf in COMPONENTS:
+    include(conf)

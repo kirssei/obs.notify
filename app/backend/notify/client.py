@@ -78,7 +78,8 @@ class TwitchEventHandler:
 
         return rewards
 
-    async def simulate_subscription(self, username="TestUser"):
+    async def simulate_subscription(self, username="[Debug] TestUser"):
+        await sync_to_async(lambda: TwitchFollow.objects.create(user=username))()
         await self.broadcaster.broadcast("follow", {"user": username})
 
     async def register_events(self):
@@ -91,6 +92,7 @@ class TwitchEventHandler:
 
     async def on_follow(self, data):
         username = data.event.user_name
+        await sync_to_async(lambda: TwitchFollow.objects.create(user=username))()
         await self.broadcaster.broadcast("follow", {"user": username})
 
     async def on_redemption(self, data):

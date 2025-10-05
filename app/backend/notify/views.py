@@ -4,9 +4,16 @@ from asgiref.sync import async_to_sync
 from django.views import View
 from django.conf import settings
 from django.shortcuts import render
+from django.core.paginator import Paginator
 from django.http import JsonResponse, HttpResponseRedirect
 
-from .models import TwitchTokens, TwitchReward, TwitchSecretsApp, TwitchBaseReward
+from .models import (
+    TwitchTokens,
+    TwitchReward,
+    TwitchFollow,
+    TwitchSecretsApp,
+    TwitchBaseReward,
+)
 from .auth import TwitchOAuthClient
 
 from app.asgi import handler
@@ -44,7 +51,7 @@ class TwitchCallbackLogin(View):
             secrets.client_secret,
             settings.TWITCH_REDIRECT_URI,
         )
-        tokens = asyncio.run(oauth_client.fetch_token(code))
+        tokens = async_to_sync(oauth_client.fetch_token)(code=code)
         try:
             TwitchTokens.save_tokens(
                 access_token=tokens["access_token"],
@@ -99,7 +106,8 @@ class MainPageView(View):
     template_name = "notify/templates/index.html"
 
     def get(self, request, *args, **kwargs):
-        redems = TwitchReward.objects.all()
+        reward_list = TwitchReward.objects.all().order_by("-created_at")
+        follow_list = TwitchFollow.objects.all().order_by("-created_at")
         base_rewards = TwitchBaseReward.objects.filter(is_enabled=True)
         secrets = TwitchSecretsApp.objects.filter(is_valid=True).last()
 
@@ -107,7 +115,16 @@ class MainPageView(View):
         if not auth:
             return HttpResponseRedirect("/notify/login")
 
-        context = {"redems": redems, "base_rewards": base_rewards}
+        reward_page_number = request.GET.get("reward_page", 1)
+        follow_page_number = request.GET.get("follow_page", 1)
+
+        reward_paginator = Paginator(reward_list, 8)
+        follow_paginator = Paginator(follow_list, 60)
+
+        rewards = reward_paginator.get_page(reward_page_number)
+        follows = follow_paginator.get_page(follow_page_number)
+
+        context = {"base_rewards": base_rewards, "follows": follows, "rewards": rewards}
 
         return render(request, self.template_name, context)
 

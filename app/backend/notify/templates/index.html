@@ -27,36 +27,73 @@
             <div class="bg-white p-4 rounded-2xl shadow">
                 <h2 class="text-xl font-semibold mb-4">Last rewards</h2>
                 <ul class="space-y-3">
-                    {% for redem in redems %}
+                    {% for reward in rewards %}
                         <li class="flex flex-col border-b pb-2">
                             <div class="flex justify-between items-start">
-                                <span class="font-medium">{{ redem.user }}</span>
+                                <span class="font-medium">{{ reward.user }}</span>
                                 <span class="text-green text-sm break-words max-w-[60%] text-right">
-                                    {{ redem.text }}
+                                    {{ reward.text }}
                                 </span>
                             </div>
                             <span class="text-xs text-gray-500 mt-1">
-                                Get at: {{ redem.created_at|date:"d.m.Y H:i" }}
+                                Get at: {{ reward.created_at|date:"d.m.Y H:i" }}
                             </span>
                         </li>
                     {% empty %}
                         <li class="text-gray-500">No data</li>
                     {% endfor %}
                 </ul>
+
+
+                {% if rewards.paginator.num_pages > 1 %}
+                <div class="flex justify-center space-x-2 mt-4">
+                    {% if rewards.has_previous %}
+                        <a href="?reward_page={{ rewards.previous_page_number }}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">←</a>
+                    {% endif %}
+
+                    <span class="px-3 py-1 bg-gray-100 rounded">
+                        Page {{ rewards.number }} / {{ rewards.paginator.num_pages }}
+                    </span>
+
+                    {% if rewards.has_next %}
+                        <a href="?reward_page={{ rewards.next_page_number }}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">→</a>
+                    {% endif %}
+                </div>
+                {% endif %}
             </div>
 
             <div class="bg-white p-4 rounded-2xl shadow">
                 <h2 class="text-xl font-semibold mb-4">Last follows</h2>
                 <ul class="space-y-2">
-                    {% for sub in subs %}
+                    {% for follow in follows %}
                         <li class="flex justify-between border-b pb-2">
-                            <span class="font-medium">{{ sub.user }}</span>
-                            <span class="text-purple-600">{{ sub.tier }}</span>
+                            <div class="flex justify-between items-start">
+                                <span class="font-medium">{{ follow.user }}</span>
+                            </div>
+                            <span class="text-xs text-gray-500 mt-1">
+                                Follow at: {{ follow.created_at|date:"d.m.Y H:i" }}
+                            </span>
                         </li>
                     {% empty %}
                         <li class="text-gray-500">No data</li>
                     {% endfor %}
                 </ul>
+
+                {% if follows.paginator.num_pages > 1 %}
+                <div class="flex justify-center space-x-2 mt-4">
+                    {% if follows.has_previous %}
+                        <a href="?follow_page={{ follows.previous_page_number }}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">←</a>
+                    {% endif %}
+
+                    <span class="px-3 py-1 bg-gray-100 rounded">
+                        Page {{ follows.number }} / {{ follows.paginator.num_pages }}
+                    </span>
+
+                    {% if follows.has_next %}
+                        <a href="?follow_page={{ follows.next_page_number }}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">→</a>
+                    {% endif %}
+                </div>
+                {% endif %}
             </div>
 
             <div class="bg-white p-4 rounded-2xl shadow relative">

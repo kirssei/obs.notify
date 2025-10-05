@@ -34,7 +34,7 @@ class TwitchFollow(models.Model):
     user = models.CharField(verbose_name="Nickname", max_length=255)
     created_at = models.DateTimeField(verbose_name="Created at", auto_now_add=True)
 
-    def __init__(self):
+    def __str__(self):
         return self.user
 
 
