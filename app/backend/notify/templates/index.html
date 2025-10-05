@@ -1,0 +1,145 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>obs.notify</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-900">
+
+    <div class="container mx-auto p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold">obs.notify</h1>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit"
+                        class="bg-red-500 text-white px-4 py-2 rounded-xl shadow hover:bg-red-600 transition">
+                    logout
+                </button>
+            </form>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <div class="bg-white p-4 rounded-2xl shadow">
+                <h2 class="text-xl font-semibold mb-4">Last rewards</h2>
+                <ul class="space-y-3">
+                    {% for reward in rewards %}
+                        <li class="flex flex-col border-b pb-2">
+                            <div class="flex justify-between items-start">
+                                <span class="font-medium">{{ reward.user }}</span>
+                                <span class="text-green text-sm break-words max-w-[60%] text-right">
+                                    {{ reward.text }}
+                                </span>
+                            </div>
+                            <span class="text-xs text-gray-500 mt-1">
+                                Get at: {{ reward.created_at|date:"d.m.Y H:i" }}
+                            </span>
+                        </li>
+                    {% empty %}
+                        <li class="text-gray-500">No data</li>
+                    {% endfor %}
+                </ul>
+
+
+                {% if rewards.paginator.num_pages > 1 %}
+                <div class="flex justify-center space-x-2 mt-4">
+                    {% if rewards.has_previous %}
+                        <a href="?reward_page={{ rewards.previous_page_number }}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">←</a>
+                    {% endif %}
+
+                    <span class="px-3 py-1 bg-gray-100 rounded">
+                        Page {{ rewards.number }} / {{ rewards.paginator.num_pages }}
+                    </span>
+
+                    {% if rewards.has_next %}
+                        <a href="?reward_page={{ rewards.next_page_number }}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">→</a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl shadow">
+                <h2 class="text-xl font-semibold mb-4">Last follows</h2>
+                <ul class="space-y-2">
+                    {% for follow in follows %}
+                        <li class="flex justify-between border-b pb-2">
+                            <div class="flex justify-between items-start">
+                                <span class="font-medium">{{ follow.user }}</span>
+                            </div>
+                            <span class="text-xs text-gray-500 mt-1">
+                                Follow at: {{ follow.created_at|date:"d.m.Y H:i" }}
+                            </span>
+                        </li>
+                    {% empty %}
+                        <li class="text-gray-500">No data</li>
+                    {% endfor %}
+                </ul>
+
+                {% if follows.paginator.num_pages > 1 %}
+                <div class="flex justify-center space-x-2 mt-4">
+                    {% if follows.has_previous %}
+                        <a href="?follow_page={{ follows.previous_page_number }}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">←</a>
+                    {% endif %}
+
+                    <span class="px-3 py-1 bg-gray-100 rounded">
+                        Page {{ follows.number }} / {{ follows.paginator.num_pages }}
+                    </span>
+
+                    {% if follows.has_next %}
+                        <a href="?follow_page={{ follows.next_page_number }}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">→</a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl shadow relative">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold">Settings of rewards</h2>
+                    <form method="post" action="{% url 'sync-rewards' %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="bg-blue-500 text-white px-3 py-1 rounded-lg shadow hover:bg-blue-600 transition">
+                            Sync
+                        </button>
+                    </form>
+                </div>
+
+                <form method="post" action="{% url 'save-rewards' %}" class="space-y-4">
+                    {% csrf_token %}
+                    <ul class="space-y-2">
+                        {% for reward in base_rewards %}
+                            <li class="flex justify-between items-center border-b pb-2">
+                                <span class="font-medium">{{ reward.name }}</span>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" name="tts_{{ reward.id }}" {% if reward.use_tts %}checked{% endif %}
+                                           class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer 
+                                                peer-checked:bg-purple-600 relative after:content-[''] 
+                                                after:absolute after:top-0.5 after:left-[2px] after:bg-white 
+                                                after:border-gray-300 after:border after:rounded-full after:h-5 
+                                                after:w-5 after:transition-all peer-checked:after:translate-x-full 
+                                                peer-checked:after:border-white"></div>
+                                </label>
+                            </li>
+                        {% empty %}
+                            <li class="text-gray-500">Rewards not synced</li>
+                        {% endfor %}
+                    </ul>
+
+                    <button type="submit"
+                            class="w-full bg-purple-600 text-white py-2 px-4 rounded-xl shadow hover:bg-purple-700 transition">
+                        Save
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
+
