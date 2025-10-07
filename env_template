@@ -1,2 +1,3 @@
 SECRET_KET = ""
 DEBUG = True/False
+TTS_LANG = en
