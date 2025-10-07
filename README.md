@@ -36,8 +36,8 @@ Perfect for streamers who want to manage notifications locally or integrate them
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/yourusername/twitch-notify.git
-cd twitch-notify
+git clone https://github.com/kirssei/obs.notify.git
+cd obs.notify
 python -m venv env
 . env/bin/activate
 poetry install
