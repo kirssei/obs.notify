@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OBS Twitch Widget</title>
+<style>
+  body {
+    background: transparent;
+    color: white;
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  #events {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+  .event {
+    display: block;
+    margin: 5px 0;
+    font-size: 32px;
+    color: black;
+  }
+</style>
+</head>
+<body>
+<div id="events"></div>
+<audio id="tts-player" preload="auto"></audio>
+
+<script>
+const ws = new WebSocket("ws://localhost:8000/ws/obs/");
+const eventsDiv = document.getElementById("events");
+const audio = document.getElementById("tts-player");
+
+ws.onmessage = (message) => {
+    let event;
+    try { event = JSON.parse(message.data); } 
+    catch { return; }
+
+    if (!event.payload) return;
+
+    const div = document.createElement("div");
+    div.className = "event";
+
+    if (event.type === "follow") {
+        div.textContent = `Follow: ${event.payload.user}`;
+        eventsDiv.prepend(div);
+        setTimeout(() => div.remove(), 4000);
+    } 
+    else if (event.type === "reward") {
+        div.innerHTML = `<strong>${event.payload.user}</strong>: ${event.payload.message}`;
+        eventsDiv.prepend(div);
+
+        if (event.payload.tts_url) {
+            audio.src = event.payload.tts_url;
+            audio.volume = 1;
+            audio.play().catch(() => console.warn("TTS playback failed"));
+            audio.onended = () => div.remove();
+        } else {
+            setTimeout(() => div.remove(), 14000);
+        }
+    }
+};
+</script>
+</body>
+</html>

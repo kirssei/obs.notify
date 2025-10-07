@@ -31,9 +31,10 @@
                         <li class="flex flex-col border-b pb-2">
                             <div class="flex justify-between items-start">
                                 <span class="font-medium">{{ reward.user }}</span>
-                                <span class="text-green text-sm break-words max-w-[60%] text-right">
-                                    {{ reward.text }}
-                                </span>
+                                <div class="text-green text-sm break-words max-w-[60%] text-right">
+                                    <div class="font-semibold">{{ reward.reward }}</div>
+                                    <div>{{ reward.text }}</div>
+                                </div>
                             </div>
                             <span class="text-xs text-gray-500 mt-1">
                                 Get at: {{ reward.created_at|date:"d.m.Y H:i" }}
@@ -114,15 +115,16 @@
                         {% for reward in base_rewards %}
                             <li class="flex justify-between items-center border-b pb-2">
                                 <span class="font-medium">{{ reward.name }}</span>
-                                <label class="inline-flex items-center cursor-pointer">
+                                <label class="inline-flex items-center cursor-pointer space-x-2">
                                     <input type="checkbox" name="tts_{{ reward.id }}" {% if reward.use_tts %}checked{% endif %}
-                                           class="sr-only peer">
+                                        class="sr-only peer">
                                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer 
                                                 peer-checked:bg-purple-600 relative after:content-[''] 
                                                 after:absolute after:top-0.5 after:left-[2px] after:bg-white 
                                                 after:border-gray-300 after:border after:rounded-full after:h-5 
                                                 after:w-5 after:transition-all peer-checked:after:translate-x-full 
                                                 peer-checked:after:border-white"></div>
+                                    <span class="text-sm text-gray-600">Enable TTS 🎙️</span>
                                 </label>
                             </li>
                         {% empty %}
